@@ -1,0 +1,22 @@
+{
+  "name": "doubanspider",
+  "version": "1.0.0",
+  "description": "通过Node.js实现简单爬虫，获取豆瓣热门电影。主要会用到的包：http, fs, path, cheerio",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zealerHuang/DoubanSpider.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zealerHuang/DoubanSpider/issues"
+  },
+  "homepage": "https://github.com/zealerHuang/DoubanSpider#readme",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2"
+  }
+}
