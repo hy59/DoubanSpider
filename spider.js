@@ -60,10 +60,10 @@ function spiderMovie(index) {
                     movies.push(movie)
                 }
                 // download image
-                downloadImg('../img/', movie.picUrl)
+                downloadImg('img/', movie.picUrl)
             })
             // save crawl data
-            saveData('./data' + (index / pageSize) + '.json', movies)
+            saveData('data/data' + (index / pageSize) + '.json', movies)
         })
     }).on('error', function (err) {
         console.log(err)
