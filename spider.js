@@ -9,7 +9,17 @@ var cheerio = require('cheerio')
 // spider url
 var opt = {
     hostname: 'movie.douban.com',
-    path: '/top250',
+    path: ['/top250?start=0&filter=',
+           '/top250?start=25&filter=',
+           '/top250?start=50&filter=',
+           '/top250?start=75&filter=',
+           '/top250?start=100&filter=',
+           '/top250?start=125&filter=',
+           '/top250?start=150&filter=',
+           '/top250?start=175&filter=',
+           '/top250?start=200&filter=',
+           '/top250?start=225&filter=',
+           '/top250?start=250&filter='],
     port: 443
 }
 
