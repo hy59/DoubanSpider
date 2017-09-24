@@ -6,6 +6,8 @@ var https = require('https')
 var fs = require('fs')
 var path = require('path')
 var cheerio = require('cheerio')
+var mongo = require('./mongo')
+var assert = require('assert')
 
 // spider info, if website use http 
 var opt = {
@@ -51,6 +53,7 @@ function spiderMovie(index) {
                 var picUrl = $('.pic img', this).attr('src')
                 var movie = {
                     title: $('.title', this).text(), // get movie name
+                    info: $('.bd p', this).text(), // get the info
                     star: $('.info .star .rating_num', this).text(), // get movie point
                     link: $('a', this).attr('href'), // get movie link
                     picUrl: picUrl
@@ -59,11 +62,18 @@ function spiderMovie(index) {
                 if (movie) {
                     movies.push(movie)
                 }
+
+                 // save data to mongodb
+                mongo.movie.create(movie, (err, doc) => {
+                    assert.equal(err, null)
+                    console.log(doc)
+                })
                 // download image
                 downloadImg('img/', movie.picUrl)
             })
             // save crawl data
             saveData('data/data' + (index / pageSize) + '.json', movies)
+           
         })
     }).on('error', function (err) {
         console.log(err)
