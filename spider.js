@@ -1,121 +1,107 @@
-'use strict';
-// 引入模块
-var http = require('http');
-var https = require('https');
-var fs = require('fs');
-var path = require('path');
-var cheerio = require('cheerio');
-// 爬虫的URL信息,如果是http站点,则使用这种方式.
+'use strict'
+
+// import modules
+var http = require('http')
+var https = require('https')
+var fs = require('fs')
+var path = require('path')
+var cheerio = require('cheerio')
+
+// spider info, if website use http 
 var opt = {
     hostname: 'movie.douban.com',
     path: '/top250',
     port: 80
-};
+}
+
+//create spider 
 function *doSpider(x) {
-    var start = 0;
-    console.log(start + ' -------------------------------');
+    var start = 0
+    console.log(start + ' -------------------------------')
     while (start < x) {
-        yield start;
-        spiderMovie(start);
-        start += 25;
+        yield start
+        spiderMovie(start)
+        start += 25
     }
 }
 for (var x of doSpider(250)) {
-    console.log(x);
+    console.log(x)
 }
-// 创建https get请求
+
+// create https get request
 function spiderMovie(index) {
     https.get('https://movie.douban.com/top250?start=' + index, function (res) {
-        var pageSize = 25;
-        var html = ''; // 保存抓取到的HTML源码
-        var movies = [];  // 保存解析HTML后的数据，即我们需要的电影信息
-        // 前面说过
-        // 这里的 res 是 Class: http.IncomingMessage 的一个实例
-        // 而 http.IncomingMessage 实现了 stream.Readable 接口
-        // 所以 http.IncomingMessage 也有 stream.Readable 的事件和方法
-        // 比如 Event: 'data', Event: 'end', readable.setEncoding() 等
-        // 设置编码
-        res.setEncoding('utf-8');
-        // 抓取页面内容
+        var pageSize = 25
+        var html = '' // save html
+        var movies = []  // save data
+        
+        // setEncoding
+        res.setEncoding('utf-8')
+        
+        // get the page
         res.on('data', function (chunk) {
-            html += chunk;
-        });
+            html += chunk
+        })
         res.on('end', function () {
-            // 使用 cheerio 加载抓取到的HTML代码
-            // 然后就可以使用 jQuery 的方法了
-            // 比如获取某个class：$('.className')
-            // 这样就能获取所有这个class包含的内容
-            var $ = cheerio.load(html);
-            // 解析页面
-            // 每个电影都在 item class 中
+            // use cheerio to parse the html
+            var $ = cheerio.load(html)
+            
             $('.item').each(function () {
-                // 获取图片链接
-                var picUrl = $('.pic img', this).attr('src');
+                // get the picture url link
+                var picUrl = $('.pic img', this).attr('src')
                 var movie = {
-                    title: $('.title', this).text(), // 获取电影名称
-                    star: $('.info .star .rating_num', this).text(), // 获取电影评分
-                    link: $('a', this).attr('href'), // 获取电影详情页链接
+                    title: $('.title', this).text(), // get movie name
+                    star: $('.info .star .rating_num', this).text(), // get movie point
+                    link: $('a', this).attr('href'), // get movie link
                     picUrl: picUrl
-                };
-                // 把所有电影放在一个数组里面
-                if (movie) {
-                    movies.push(movie);
                 }
-                // 下载图片
-                downloadImg('../img/', movie.picUrl);
-            });
-            // 保存抓取到的电影数据
-            saveData('./data' + (index / pageSize) + '.json', movies);
-        });
+                
+                if (movie) {
+                    movies.push(movie)
+                }
+                // download image
+                downloadImg('../img/', movie.picUrl)
+            })
+            // save crawl data
+            saveData('./data' + (index / pageSize) + '.json', movies)
+        })
     }).on('error', function (err) {
-        console.log(err);
-    });
+        console.log(err)
+    })
 }
-/**
- * 保存数据到本地
- *
- * @param {string} path 保存数据的文件夹
- * @param {array} movies 电影信息数组
- */
+
+//save data to local
 function saveData(path, movies) {
-    console.log(movies);
-    // 调用 fs.writeFile 方法保存数据到本地
+    console.log(movies)
+    // use fs.writeFile 
     // fs.writeFile(filename, data[, options], callback)
-    // fs.writeFile 方法第一个参数是需要保存在本地的文件名称（包含路径）
-    // 第二个参数是文件数据
-    // 然后有个可选参数，可以是 encoding，mode 或者 flag
-    // 最后一个参数是一个回调函数
     fs.writeFile(path, JSON.stringify(movies, null, ' '), function (err) {
         if (err) {
-            return console.log(err);
+            return console.log(err)
         }
-        console.log('Data saved');
+        console.log('Data saved')
     });
 }
-/**
- * 下载图片
- *
- * @param {string} imgDir 存放图片的文件夹
- * @param {string} url 图片的URL地址
- */
+
+// download image
 function downloadImg(imgDir, url) {
     https.get(url, function (res) {
-        var data = '';
-        res.setEncoding('binary');
+        var data = ''
+        res.setEncoding('binary')
         res.on('data', function (chunk) {
-            data += chunk;
-        });
+            data += chunk
+        })
         res.on('end', function () {
-            // 调用 fs.writeFile 方法保存图片到本地
+            // use fs.writeFile to save imags to local
             fs.writeFile(imgDir + path.basename(url), data, 'binary', function (err) {
                 if (err) {
-                    return console.log(err);
+                    return console.log(err)
                 }
-                console.log('Image downloaded: ', path.basename(url));
-            });
-        });
+                console.log('Image downloaded: ', path.basename(url))
+            })
+        })
     }).on('error', function (err) {
-        console.log(err);
-    });
+        console.log(err)
+    })
 } 
  
